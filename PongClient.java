@@ -24,7 +24,7 @@ public class PongClient extends JPanel implements ActionListener, KeyListener {
         addKeyListener(this);
         setFocusable(true);
         try {
-            socket = new Socket("localhost", 12345); // Conecta ao servidor
+            socket = new Socket("ip-servidor", 12345); // Conecta ao servidor
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
             timer = new Timer(5, this);
