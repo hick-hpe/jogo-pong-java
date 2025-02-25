@@ -16,6 +16,7 @@ public class PongClient extends JPanel implements ActionListener, KeyListener {
 
     private Socket socket;
     private DataInputStream in;
+    private DataOutputStream out;
 
     public PongClient() {
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
@@ -23,8 +24,9 @@ public class PongClient extends JPanel implements ActionListener, KeyListener {
         addKeyListener(this);
         setFocusable(true);
         try {
-            socket = new Socket("192.168.246.101", 12345);  // Conecta ao servidor
+            socket = new Socket("localhost", 12345);  // Conecta ao servidor
             in = new DataInputStream(socket.getInputStream());
+            out = new DataOutputStream(socket.getOutputStream());
             timer = new Timer(5, this);
             timer.start();
         } catch (IOException e) {
@@ -48,7 +50,11 @@ public class PongClient extends JPanel implements ActionListener, KeyListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            // Lê as informações enviadas pelo servidor
+            // Envia a movimentação das teclas para o servidor
+            out.writeBoolean(up2);   // Movimentação para cima
+            out.writeBoolean(down2); // Movimentação para baixo
+
+            // Lê o estado do jogo enviado pelo servidor
             paddle1Y = in.readInt();
             paddle2Y = in.readInt();
             ballX = in.readInt();
