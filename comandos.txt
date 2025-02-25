@@ -1,0 +1,2 @@
+javac PongServer.java && java PongServer
+javac PongClient.java && java PongClient

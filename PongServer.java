@@ -50,64 +50,44 @@ public class PongServer extends JPanel implements ActionListener, KeyListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        try {
-            // Lê os movimentos enviados pelo cliente
+public void actionPerformed(ActionEvent e) {
+    try {
+        if (in.available() > 0) {
             up2 = in.readBoolean();
             down2 = in.readBoolean();
-
-            // Atualiza o movimento do jogador 2 (paddle 2)
-            if (up2 && paddle2Y > 0) {
-                paddle2Y -= paddleSpeed;
-            }
-            if (down2 && paddle2Y < HEIGHT - paddleHeight) {
-                paddle2Y += paddleSpeed;
-            }
-
-            // Movimento da bola
-            ballX += ballDX;
-            ballY += ballDY;
-
-            if (ballY <= 0 || ballY >= HEIGHT - 15) {
-                ballDY = -ballDY;
-            }
-
-            if (ballX <= 40 && ballY + 15 >= paddle1Y && ballY <= paddle1Y + paddleHeight) {
-                ballDX = -ballDX;
-            }
-            if (ballX >= WIDTH - 55 && ballY + 15 >= paddle2Y && ballY <= paddle2Y + paddleHeight) {
-                ballDX = -ballDX;
-            }
-
-            if (ballX <= 0) {
-                score2++;
-                resetBall();
-            }
-            if (ballX >= WIDTH - 15) {
-                score1++;
-                resetBall();
-            }
-
-            if (up1 && paddle1Y > 0) {
-                paddle1Y -= paddleSpeed;
-            }
-            if (down1 && paddle1Y < HEIGHT - paddleHeight) {
-                paddle1Y += paddleSpeed;
-            }
-
-            // Envia o estado atualizado do jogo para o cliente
-            out.writeInt(paddle1Y);
-            out.writeInt(paddle2Y);
-            out.writeInt(ballX);
-            out.writeInt(ballY);
-            out.writeInt(score1);
-            out.writeInt(score2);
-        } catch (IOException ex) {
-            ex.printStackTrace();
         }
 
-        repaint();
+        // Movimento do jogador 1 (Servidor)
+        if (up1 && paddle1Y > 0) {
+            paddle1Y -= paddleSpeed;
+        }
+        if (down1 && paddle1Y < HEIGHT - paddleHeight) {
+            paddle1Y += paddleSpeed;
+        }
+
+        // Movimento do jogador 2 (Cliente)
+        if (up2 && paddle2Y > 0) {
+            paddle2Y -= paddleSpeed;
+        }
+        if (down2 && paddle2Y < HEIGHT - paddleHeight) {
+            paddle2Y += paddleSpeed;
+        }
+
+        // Enviar estado atualizado para o cliente
+        out.writeInt(paddle1Y);
+        out.writeInt(paddle2Y);
+        out.writeInt(ballX);
+        out.writeInt(ballY);
+        out.writeInt(score1);
+        out.writeInt(score2);
+        out.flush();
+    } catch (IOException ex) {
+        ex.printStackTrace();
     }
+
+    repaint();
+}
+
 
     private void resetBall() {
         ballX = WIDTH / 2;
@@ -116,7 +96,8 @@ public class PongServer extends JPanel implements ActionListener, KeyListener {
     }
 
     @Override
-    public void keyTyped(KeyEvent e) {}
+    public void keyTyped(KeyEvent e) {
+    }
 
     @Override
     public void keyPressed(KeyEvent e) {
