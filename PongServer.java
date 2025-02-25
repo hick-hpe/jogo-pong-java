@@ -50,44 +50,70 @@ public class PongServer extends JPanel implements ActionListener, KeyListener {
     }
 
     @Override
-public void actionPerformed(ActionEvent e) {
-    try {
-        if (in.available() > 0) {
-            up2 = in.readBoolean();
-            down2 = in.readBoolean();
+    public void actionPerformed(ActionEvent e) {
+        try {
+            if (in.available() > 0) {
+                up2 = in.readBoolean();
+                down2 = in.readBoolean();
+            }
+
+            // Movimento do jogador 1 (Servidor)
+            if (up1 && paddle1Y > 0) {
+                paddle1Y -= paddleSpeed;
+            }
+            if (down1 && paddle1Y < HEIGHT - paddleHeight) {
+                paddle1Y += paddleSpeed;
+            }
+
+            // Movimento do jogador 2 (Cliente)
+            if (up2 && paddle2Y > 0) {
+                paddle2Y -= paddleSpeed;
+            }
+            if (down2 && paddle2Y < HEIGHT - paddleHeight) {
+                paddle2Y += paddleSpeed;
+            }
+
+            // Movimento da bola
+            ballX += ballDX;
+            ballY += ballDY;
+
+            // Colisão com as bordas superior e inferior
+            if (ballY <= 0 || ballY >= HEIGHT - 15) {
+                ballDY = -ballDY;
+            }
+
+            // Colisão com os paddles
+            if (ballX <= 40 && ballY >= paddle1Y && ballY <= paddle1Y + paddleHeight) {
+                ballDX = -ballDX;
+            }
+            if (ballX >= WIDTH - 50 && ballY >= paddle2Y && ballY <= paddle2Y + paddleHeight) {
+                ballDX = -ballDX;
+            }
+
+            // Se a bola sair da tela (ponto do adversário)
+            if (ballX <= 0) {
+                score2++;
+                resetBall();
+            }
+            if (ballX >= WIDTH) {
+                score1++;
+                resetBall();
+            }
+
+            // Enviar estado atualizado para o cliente
+            out.writeInt(paddle1Y);
+            out.writeInt(paddle2Y);
+            out.writeInt(ballX);
+            out.writeInt(ballY);
+            out.writeInt(score1);
+            out.writeInt(score2);
+            out.flush();
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
 
-        // Movimento do jogador 1 (Servidor)
-        if (up1 && paddle1Y > 0) {
-            paddle1Y -= paddleSpeed;
-        }
-        if (down1 && paddle1Y < HEIGHT - paddleHeight) {
-            paddle1Y += paddleSpeed;
-        }
-
-        // Movimento do jogador 2 (Cliente)
-        if (up2 && paddle2Y > 0) {
-            paddle2Y -= paddleSpeed;
-        }
-        if (down2 && paddle2Y < HEIGHT - paddleHeight) {
-            paddle2Y += paddleSpeed;
-        }
-
-        // Enviar estado atualizado para o cliente
-        out.writeInt(paddle1Y);
-        out.writeInt(paddle2Y);
-        out.writeInt(ballX);
-        out.writeInt(ballY);
-        out.writeInt(score1);
-        out.writeInt(score2);
-        out.flush();
-    } catch (IOException ex) {
-        ex.printStackTrace();
+        repaint();
     }
-
-    repaint();
-}
-
 
     private void resetBall() {
         ballX = WIDTH / 2;
